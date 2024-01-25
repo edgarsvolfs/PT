@@ -1,5 +1,6 @@
 const express = require('express');
-const formidable = require('formidable');
+const js2xmlparser = require('js2xmlparser');
+//const formidable = require('formidable');
 const xml2js = require('xml2js');
 const app = express();
 
@@ -39,7 +40,7 @@ app.use((req, res, next) => {
         };
         
         const resultToString = JSON.stringify(result.request);
-        const modifiedResultToString = resultToString.replace(/[\[\]']+/g, ''); // xml12js converts it to json with [] brackets, this removes it
+        const modifiedResultToString = resultToString.replace(/[\[\]']+/g, ''); 
         const endResult = JSON.parse(modifiedResultToString);
         req.body = endResult;
         logIncomingRequest(req.body);
@@ -92,16 +93,21 @@ app.post('/', async (req, res) => {
       const response = await axios.get(apiUrl);
       const products = response.data.products;
 
-      // Transform the data, e.g., add final_price field
       const transformedData = products.map(product => ({
         title: product.title,
         description: product.description,
         final_price: parseFloat((product.price / product.discountPercentage * 100).toFixed(2)),
       }));
-  
-      // Send the transformed data as the response 
       res.json(transformedData); 
       
+      const acceptHeader = req.headers.accept;
+      if (acceptHeader === 'application/xml') {
+        const xmlData = js2xmlparser.parse('request', req.body);
+        console.log(xmlData);
+      }else if(acceptHeader === 'application/json'){
+        console.log(req.body);
+      }
+
     } catch (error) {
 
       res.locals.error = error; // for js middleware outgoing message
@@ -111,9 +117,9 @@ app.post('/', async (req, res) => {
       // Log outgoing message
       const outgoingLog = {
         type: 'messageOut',
-        body: res.locals.body,
+        body: req.body,
         dateTime: new Date().toISOString(),
-        fault: res.locals.error ? res.locals.error.stack : null, // Set fault to error stack if there's an error
+        fault: res.locals.error ? res.locals.error.stack : null,
       };
       console.log(JSON.stringify(outgoingLog, null, 2));
     }

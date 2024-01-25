@@ -3,6 +3,7 @@
     "body-parser-xml": "^2.0.5",
     "express": "^4.18.2",
     "formidable": "^3.5.1",
+    "js2xmlparser": "^5.0.0",
     "xml2js": "^0.6.2"
   }
 }
