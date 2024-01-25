@@ -104,7 +104,7 @@ app.post('/', async (req, res) => {
       if (acceptHeader === 'application/xml') {
         const xmlData = js2xmlparser.parse('request', req.body);
         console.log(xmlData);
-      }else if(acceptHeader === 'application/json'){
+      }else{
         console.log(req.body);
       }
 
